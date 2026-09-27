@@ -31,6 +31,9 @@ class LoginRepositoryImpl implements LoginRepository {
         return const Right(unit);
       } on AuthenticationException {
         return Left(AuthenticationFailure());
+      } catch (e) {
+        print('❌ login network error: $e');
+        return Left(ServerFailure());
       }
     } else {
       return Left(OfflineFailure());

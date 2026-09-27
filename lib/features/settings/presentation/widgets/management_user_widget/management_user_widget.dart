@@ -1,9 +1,10 @@
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:shleehcustomer/core/strings/assets_path.dart';
 import 'package:shleehcustomer/core/styles/app_theme.dart';
 import 'package:shleehcustomer/core/strings/language.dart';
 import 'package:shleehcustomer/core/util/cashed_data/cashed_file.dart';
+import 'package:shleehcustomer/features/authentication/login/data/models/user_profile.dart';
 import 'package:shleehcustomer/core/util/common_functions.dart';
 import 'package:shleehcustomer/core/widgets/action_btn.dart';
 import 'package:shleehcustomer/core/widgets/bottom_sheets.dart';
@@ -36,10 +37,13 @@ class ManagementUserFormWidget extends StatefulWidget {
       _ManagementUserFormWidgetState();
 }
 
-var isLoading = false;
-
 class _ManagementUserFormWidgetState extends State<ManagementUserFormWidget> {
   final _formKey = GlobalKey<FormState>();
+  // Was a top-level global before — meant this "is the profile save in
+  // flight" flag was shared across every instance of this widget, and
+  // could get stuck true if the user navigated away mid-request. Now a
+  // proper instance field that always starts fresh.
+  bool _isSavingProfile = false;
 
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
@@ -50,6 +54,13 @@ class _ManagementUserFormWidgetState extends State<ManagementUserFormWidget> {
     _lastNameController.text = widget.user.lastName;
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    super.dispose();
   }
 
   @override
@@ -103,18 +114,36 @@ class _ManagementUserFormWidgetState extends State<ManagementUserFormWidget> {
                               const SizedBox(
                                 height: 20,
                               ),
-                              isLoading
-                                  ? const Center(
-                                      child: CircularProgressIndicator())
-                                  : Container(),
                               const SizedBox(
                                 height: 10,
                               ),
                               BlocConsumer<SettingBloc, SettingState>(
                                   listener: (context, state) async {
                                 if (state is UpdatedUserState) {
-                                  isLoading = false;
+                                  _isSavingProfile = false;
                                   setState(() {});
+                                  // The update only went to the server —
+                                  // the locally cached profile (what the
+                                  // home page greeting and the WhatsApp
+                                  // message read via CasheFile.loadUser())
+                                  // still held the old name until this ran,
+                                  // which is why editing a name here never
+                                  // showed up back on the home tab.
+                                  await CasheFile.saveUser(UserProfile(
+                                    id: widget.user.id,
+                                    firstName: _firstNameController.text,
+                                    lastName: _lastNameController.text,
+                                    email: widget.user.email,
+                                    phoneNumber: widget.user.phoneNumber,
+                                    birthDate: widget.user.birthDate,
+                                    userImage: widget.user.userImage,
+                                    gender: widget.user.gender,
+                                    password: widget.user.password,
+                                    gouvernate: widget.user.governorate,
+                                    state: widget.user.state,
+                                    points: widget.user.points,
+                                    createdDate: widget.user.createdDate,
+                                  ));
                                   BottomSheetsCustom
                                       .showSuccessBottomWidgetDialog(
                                           context,
@@ -123,18 +152,17 @@ class _ManagementUserFormWidgetState extends State<ManagementUserFormWidget> {
                                                   .keySuccessUpdateProfile),
                                           "");
                                 } else if (state is ErrorUpdateUserState) {
-                                  isLoading = false;
+                                  _isSavingProfile = false;
                                   setState(() {});
                                   BottomSheetsCustom.showFailBottomWidgetDialog(
                                       context,
                                       getTextByKey(
                                           key: TranslationKey.keyError),
                                       "");
-                                } else {
-                                  isLoading = false;
                                 }
                               }, builder: (context, state) {
                                 return ActionBtn(
+                                    isLoading: _isSavingProfile,
                                     btnColor: primaryColor,
                                     onPressed: () {
                                       validateFormThenUpdate();
@@ -180,8 +208,6 @@ class _ManagementUserFormWidgetState extends State<ManagementUserFormWidget> {
                                       getTextByKey(
                                           key: TranslationKey.keyError),
                                       "");
-                                } else {
-                                  isLoading = false;
                                 }
                               }, builder: (context, state) {
                                 return ActionBtn(
@@ -225,7 +251,7 @@ class _ManagementUserFormWidgetState extends State<ManagementUserFormWidget> {
   void validateFormThenUpdate() {
     final isValid = _formKey.currentState!.validate();
     if (isValid) {
-      isLoading = true;
+      _isSavingProfile = true;
       setState(() {});
       BlocProvider.of<SettingBloc>(context).add(UpdateUserEvent({
         "id": widget.user.id,

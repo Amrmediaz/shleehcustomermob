@@ -36,13 +36,14 @@ class RegisterUserPage extends StatelessWidget {
               if (state is MessageRegisterUserState) {
                 CommonFunctions.showBottomDialog(
                     context,
-                    Icon(
+                   icon: Icon(
                       Icons.verified_user_sharp,
                       color: primaryColor,
                       size: CommonFunctions.calculateIconSize(context),
                     ),
-                    getTextByKey(key: TranslationKey.keySuccessRegisterTitle),
-                    getTextByKey(key: TranslationKey.keySuccessRegisterMsg));
+                   title:  getTextByKey(key: TranslationKey.keySuccessRegisterTitle),
+                 description:    getTextByKey(key: TranslationKey.keySuccessRegisterMsg));
+
                 await CommonFunctions.delay(() {
                   Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(builder: (_) => const HomePage()),

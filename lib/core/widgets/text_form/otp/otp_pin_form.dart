@@ -30,6 +30,20 @@ class _PinFormState extends State<PinForm> {
     super.initState();
     _pin1Focus.requestFocus();
   }
+
+  @override
+  void dispose() {
+    _pin1Controller.dispose();
+    _pin2Controller.dispose();
+    _pin3Controller.dispose();
+    _pin4Controller.dispose();
+    _pin1Focus.dispose();
+    _pin2Focus.dispose();
+    _pin3Focus.dispose();
+    _pin4Focus.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(

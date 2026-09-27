@@ -22,7 +22,7 @@ class ResetPasswordDataSourceImpl implements ResetPasswordDataSource {
         Uri.parse( (IS_STATGING ? BASE_URL_STAGGING : BASE_URL) + RESET_PASSWORD_URL),
 
       body: jsonEncode(body),  headers: {"Content-Type": "application/json"}
-    );
+    ).timeout(const Duration(seconds: 20));
     print(response.body);
     if (response.statusCode == 200) {
       return Future.value(unit);

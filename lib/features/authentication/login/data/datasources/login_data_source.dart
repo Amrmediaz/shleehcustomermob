@@ -24,7 +24,7 @@ class LoginDataSourceImpl implements LoginDataSource {
     final response = await client.post(
         Uri.parse( (IS_STATGING ? BASE_URL_STAGGING : BASE_URL) + LOGIN_URL),
       body: jsonEncode(body),  headers: {"Content-Type": "application/json"}
-    );
+    ).timeout(const Duration(seconds: 20));
       print(body);
     if (response.statusCode == 201) {
       final Map<String, dynamic> decodedJson = json.decode(response.body);
@@ -47,7 +47,7 @@ class LoginDataSourceImpl implements LoginDataSource {
 
     final response = await client.get(
         Uri.parse( (IS_STATGING ? BASE_URL_STAGGING : BASE_URL) + PROFILE_URL), headers: {"Authorization" :"Bearer $token"}
-    );
+    ).timeout(const Duration(seconds: 20));
     if (response.statusCode == 200) {
       final Map<String, dynamic> decodedJson = json.decode(response.body);
       if (decodedJson["status"] == true){

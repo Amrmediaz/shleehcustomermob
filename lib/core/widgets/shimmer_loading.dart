@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:shleehcustomer/core/util/Constants.dart';
 
 class ShimmerLoading extends StatefulWidget {
@@ -12,15 +13,19 @@ class ShimmerLoading extends StatefulWidget {
 class _ShimmerLoadingState extends State<ShimmerLoading> {
   @override
   Widget build(BuildContext context) {
-    return  ListView(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      children: const [
-        LoadingItem(),
-        LoadingItem(),
-        LoadingItem(),
-
-      ],
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      period: const Duration(milliseconds: 1200),
+      child: ListView(
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        children: const [
+          LoadingItem(),
+          LoadingItem(),
+          LoadingItem(),
+        ],
+      ),
     );
   }
 }
@@ -51,14 +56,17 @@ class ShimmerBoxLoading extends StatefulWidget {
 class _ShimmerBoxLoadingState extends State<ShimmerBoxLoading> {
   @override
   Widget build(BuildContext context) {
-    return  ListView(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      children: const [
-        LoadingBoxItem(),
-
-
-      ],
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade100,
+      period: const Duration(milliseconds: 1200),
+      child: ListView(
+        physics: const NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        children: const [
+          LoadingBoxItem(),
+        ],
+      ),
     );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 import '../../../../core/styles/app_theme.dart';
 import '../../../../core/styles/text/text_style.dart';

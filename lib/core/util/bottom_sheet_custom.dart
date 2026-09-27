@@ -165,6 +165,12 @@ class BottomSheetsCustom {
           ),
         ));
       },
-    );
+    ).then((_) {
+      // These controllers aren't owned by any State object (this whole
+      // dialog is built from a static function), so nothing was disposing
+      // them before — dispose once the sheet is dismissed instead.
+      _usernameController.dispose();
+      _passwordController.dispose();
+    });
   }
 }

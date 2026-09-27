@@ -1,22 +1,43 @@
+// Keep whatever import already gives you `BookingDay` here — in your
+// pasted model that was `import '../../domain/entities/booking.dart';`.
+// import 'booking.dart';
+
 import '../../data/models/booking_details.dart';
 
-
+/// Domain entity — replace the contents of
+/// `../../domain/entities/booking_details_model.dart` with this.
 class BookingDetails {
-    int id;
-    String name;
-    String phone;
-    String state;
-    String gouvernate;
-    dynamic coast;
-    int noOfDays;
-    String? note;
-    String crreatedDate;
-    String? insuranceAmount;
-    String paidAmount;
-    List<BookingDay> bookingDays;
-    double? buildingRate;
-    int buildingID;
-    int customerId;
+    final int id;
+    final String name;
+    final String phone;
+    final String state;
+    final String gouvernate;
+    final dynamic coast;
+    final int noOfDays;
+    final String? note;
+    final String crreatedDate;
+    final String? insuranceAmount;
+    final String paidAmount;
+    final List<BookingDay> bookingDays;
+    final double? buildingRate;
+    final int buildingID;
+    final int customerId;
+
+    // ── New fields ──────────────────────────────────────────────────────
+    final String? currentPaid;
+    final String? remainingPaid;
+    final String? customerNotes;
+    final String? customerEmail;
+    // 1 = normal online bank payment, 3 = QPay installments — same values
+    // sent to BookingPayment/BookingPaymentQpay. Nullable since older or
+    // non-online (WhatsApp transfer confirmation) bookings may not have it.
+    final int? paymentType;
+    // QPay installment loan reference — present once a booking has been
+    // confirmed via BookingQpayConfirm. When isLoan is true and loanId is
+    // non-empty, the details page shows it so the customer can follow up
+    // with QPay directly using that id.
+    final bool? isLoan;
+    final String? loanId;
 
     BookingDetails({
         required this.id,
@@ -34,49 +55,23 @@ class BookingDetails {
         this.buildingRate,
         required this.buildingID,
         required this.customerId,
+        this.currentPaid,
+        this.remainingPaid,
+        this.customerNotes,
+        this.customerEmail,
+        this.paymentType,
+        this.isLoan,
+        this.loanId,
     });
-
-    factory BookingDetails.fromJson(Map<String, dynamic> json) {
-        return BookingDetails(
-            id: json['id'],
-            name: json['name'],
-            phone: json['phone'],
-            state: json['state'] ?? '',
-            gouvernate: json['gouvernate'] ?? '',
-            coast: json['coast'].toDouble(),
-            noOfDays: json['noOFDays'],
-            note: json['note'],
-            crreatedDate: json['crreatedDate'],
-            insuranceAmount: json['insuranceamount'],
-            paidAmount: json['paidamount'],
-            bookingDays: List<BookingDay>.from(json['bookingDays'].map((item) => BookingDay.fromJson(item))),
-            buildingRate: json['buildingRate'] != null ? json['buildingRate'].toDouble() : null,
-            buildingID: json['buildingID'],
-            customerId: json['customerId'],
-        );
-    }
 
     Map<String, dynamic> toJson() {
         return {
             'id': id,
             'name': name,
-            'phone': phone,
             'state': state,
             'gouvernate': gouvernate,
-            'coast': coast,
-            'noOFDays': noOfDays,
             'note': note,
             'crreatedDate': crreatedDate,
-            'insuranceamount': insuranceAmount,
-            'paidamount': paidAmount,
-            'bookingDays': bookingDays.map((item) => item.toJson()).toList(),
-            'buildingRate': buildingRate,
-            'buildingID': buildingID,
-            'customerId': customerId,
         };
     }
 }
-
-
-
-

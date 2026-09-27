@@ -9,8 +9,10 @@ import '../../domain/entities/payment.dart';
 
 class BookChaletScreen extends StatelessWidget {
   final PaymentDetails paymentDetails;
+  final bool isChalet;
    const BookChaletScreen({super.key,
-   required this.paymentDetails
+   required this.paymentDetails ,
+     required this.isChalet
 
   });
 
@@ -30,7 +32,7 @@ class BookChaletScreen extends StatelessWidget {
           AppBarBack(leadingWidgetAction: () {
             Navigator.pop(context);
           }),
-           BookingChaletForm(paymentDetails: paymentDetails,)
+           BookingChaletForm(paymentDetails: paymentDetails, isChalet: isChalet)
         ]);
   
   }

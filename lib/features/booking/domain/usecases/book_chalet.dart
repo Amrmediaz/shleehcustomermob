@@ -9,8 +9,8 @@ class BookChaletUsecase {
 
   BookChaletUsecase(this.repository);
 
-  Future<Either<Failure, int>> call( {required dynamic bookingData }) async {
-    return await repository. bookChalet(bookingData: bookingData);
+  Future<Either<Failure, int>> call( {required dynamic bookingData , required bool isChalet }) async {
+    return await repository. bookChalet(bookingData: bookingData, isChalet: isChalet);
   }
 
 }

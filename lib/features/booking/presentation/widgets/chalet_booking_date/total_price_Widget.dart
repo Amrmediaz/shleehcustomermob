@@ -9,24 +9,40 @@ import '../../../../chalets/domain/entities/chalet_details_model.dart';
 import '../../bloc/bookings/bookings_bloc.dart';
 
 class TotalPriceWidget extends StatelessWidget {
-  final ChaletDetails chalet;
-  List<Map<String, dynamic>> bookingDaysCalculatePrice ;
+  final dynamic chalet;
+  List<Map<String, dynamic>> bookingDaysCalculatePrice;
   dynamic totalBookingPrice;
   dynamic currentPaid;
 
-  TotalPriceWidget({super.key, required this.chalet , required this.bookingDaysCalculatePrice , required this.totalBookingPrice , required this.currentPaid});
+  TotalPriceWidget({
+    super.key,
+    required this.chalet,
+    required this.bookingDaysCalculatePrice,
+    required this.totalBookingPrice,
+    required this.currentPaid,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        padding: const EdgeInsets.all(10),
+    // ✅ Calculate totals correctly
+    double basePrice = double.parse(totalBookingPrice.toString());
+    double insurance = chalet.insuranceamount is double ? chalet.insuranceamount : double.parse(chalet.insuranceamount ?? "0");
+    double totalWithInsurance = basePrice + insurance;
+
+    // currentPaid already includes insurance if needed
+    double paidNow = double.parse(currentPaid.toString());
+
+    return  Directionality(
+      textDirection: TextDirection.rtl,child: Container(
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-            border: Border.all(color: primaryColor, width: 0.3),
-            borderRadius: const BorderRadius.all(
-                Radius.circular(DEFAULT_CORNER)),
-            color: Colors.grey.shade50),
+          border: Border.all(color: primaryColor, width: 0.5),
+          borderRadius: BorderRadius.circular(DEFAULT_CORNER),
+          color: Colors.grey.shade50,
+        ),
         child: Column(
           children: [
+            // ── Days & Base Price ──
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -34,132 +50,123 @@ class TotalPriceWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      " ${getTextByKey(key: TranslationKey.keyDays)}",
+                      getTextByKey(key: TranslationKey.keyDays),
                       style: TextStyles.textStyleBody(context),
                     ),
-                    const SizedBox(
-                      height: 4,
-                    ),
+                    const SizedBox(height: 4),
                     Text(
-                      " ${getTextByKey(key: TranslationKey.keyDaysCost)}",
+                      getTextByKey(key: TranslationKey.keyDaysCost),
                       style: TextStyles.textStyleBody(context),
                     ),
-                    const SizedBox(
-                      height: 4,
-                    ),
-                    chalet.insuranceamount != "0.0"
-                        ? Text(
-                      getTextByKey(
-                          key: TranslationKey
-                              .keyInsurance),
-                      style: TextStyles.textStyleBody(
-                          context),
-                    )
-                        : Container(),
+                    if (insurance > 0) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        getTextByKey(key: TranslationKey.keyInsurance),
+                        style: TextStyles.textStyleBody(context),
+                      ),
+                    ],
                   ],
-                ),
-                const SizedBox(
-                  height: 10,
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
                       "${bookingDaysCalculatePrice.length}",
-                      style: TextStyles.textStyleTitle(context),
+                      style: TextStyles.textStyleBody(context),
                     ),
-                    const SizedBox(
-                      height: 4,
-                    ),
+                    const SizedBox(height: 4),
                     Text(
-                      "$totalBookingPrice ${getTextByKey(key: TranslationKey.keyOMR)}",
-                      style: TextStyles.textStyleTitle(context),
+                      "$basePrice ${getTextByKey(key: TranslationKey.keyOMR)}",
+                      style: TextStyles.textStyleBody(context),
                     ),
-                    chalet.insuranceamount != "0.0"
-                        ? const SizedBox(
-                      height: 4,
-                    )
-                        : Container(),
-                    chalet.insuranceamount != "0.0"
-                        ? Text(
-                      "${chalet.insuranceamount} ${getTextByKey(key: TranslationKey.keyOMR)}",
-                      style: TextStyles.textStyleTitle(
-                          context),
-                    )
-                        : Container(),
+                    if (insurance > 0) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        "$insurance ${getTextByKey(key: TranslationKey.keyOMR)}",
+                        style: TextStyles.textStyleBody(context),
+                      ),
+                    ],
                   ],
                 ),
               ],
             ),
-            const SizedBox(
-              height: 5,
-            ),
-            chalet.insuranceamount != "0.0"
-                ? Wrap(
-              children: [
-                Text(
-                  "رسوم التأمين مستردة في حالة عدم وجود أي إتلاف لمرافق الشاليه",
-                  maxLines: 2,
-                  style:
-                  TextStyles.textStyleHelper(context)
-                      .copyWith(
-                      color:
-                      Colors.grey.shade600),
-                ),
-              ],
-            )
-                : Container(),
-            const SizedBox(
-              height: 10,
-            ),
-            Container(
-              decoration: const BoxDecoration(
-                color: Colors.grey,
+
+            const SizedBox(height: 8),
+
+            // ── Insurance note ──
+            if (insurance > 0)
+              Wrap(
+                children: [
+                  Text(
+                    "رسوم التأمين مستردة في حالة عدم وجود أي إتلاف لمرافق الشاليه",
+                    maxLines: 2,
+                    style: TextStyles.textStyleHelper(context).copyWith(
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
               ),
-              width: MediaQuery.of(context).size.width / 1.2,
+
+            const SizedBox(height: 12),
+
+            // ── Divider ──
+            Container(
+              color: Colors.grey.shade300,
               height: 0.5,
             ),
-            const SizedBox(
-              height: 10,
-            ),
+
+            const SizedBox(height: 12),
+
+            // ── Total Price (Base + Insurance) ──
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Flexible(child: Text(
-                  getTextByKey(
-                      key: TranslationKey.keyBookingPrice),
-                  style: TextStyles.textStyleTitle(context)
-                      .copyWith(color: primaryColor),
-                )),
+                Flexible(
+                  child: Text(
+                  insurance > 0 ? getTextByKey(key: TranslationKey.keyBookingPriceWithInsurance)  :  getTextByKey(key: TranslationKey.keyBookingPrice),
+                    style: TextStyles.textStyleBody(context).copyWith(
+                      color: primaryColor,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
                 Text(
-                  "${ (totalBookingPrice + (double.parse(chalet.insuranceamount)) ?? 0.0  )} ${getTextByKey(key: TranslationKey.keyOMR)}",
-                  style: TextStyles.textStyleTitle(context)
-                      .copyWith(color: primaryColor),
-                )
-              ],
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(child: Text(
-                  getTextByKey(
-                      key: TranslationKey.keyBookingPriceAfterDeposit),
-                  style: TextStyles.textStyleTitle(context)
-                      .copyWith(color: secondaryColor),
-                )),
-                Text(
-                  "${ currentPaid + (double.parse(chalet.insuranceamount)) ?? 0.0} ${getTextByKey(key: TranslationKey.keyOMR)}",
-                  style: TextStyles.textStyleTitle(context)
-                      .copyWith(color: secondaryColor),
+                  "$totalWithInsurance ${getTextByKey(key: TranslationKey.keyOMR)}",
+                  style: TextStyles.textStyleBody(context).copyWith(
+                    color: primaryColor,
+                    fontWeight: FontWeight.w700,
+                  ),
                 )
               ],
             ),
 
+            const SizedBox(height: 10),
+
+            // ── Amount to Pay Now ──
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Text(
+                    "المبلغ المطلوب دفعه",
+                    style: TextStyles.textStyleBody(context).copyWith(
+                      color: secondaryColor,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Text(
+                  "$paidNow ${getTextByKey(key: TranslationKey.keyOMR)}",
+                  style: TextStyles.textStyleBody(context).copyWith(
+                    color: secondaryColor,
+                    fontWeight: FontWeight.w700,
+                  ),
+                )
+              ],
+            ),
           ],
-        ));
+        ),
+      ),
+    );
   }
-
 }

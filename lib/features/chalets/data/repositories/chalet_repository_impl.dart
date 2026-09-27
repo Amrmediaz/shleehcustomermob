@@ -1,7 +1,6 @@
 
 
 import 'package:dartz/dartz.dart';
-import 'package:shleehcustomer/features/chalets/data/models/chalet_details.dart';
 import 'package:shleehcustomer/features/chalets/domain/entities/chalet_map.dart';
 
 import '../../../../core/error/exceptions.dart';
@@ -44,6 +43,9 @@ class ChaletsRepositoryImpl implements ChaletsRepository {
       } on ServerException {
 
         return Left(ServerFailure());
+      } catch (e) {
+        print('❌ getChalets network error: $e');
+        return Left(ServerFailure());
       }
     } else {
       try {
@@ -65,6 +67,9 @@ class ChaletsRepositoryImpl implements ChaletsRepository {
       } on ServerException {
 
         return Left(ServerFailure());
+      } catch (e) {
+        print('❌ getChaletByID network error: $e');
+        return Left(ServerFailure());
       }
     } else {
       return Left(OfflineFailure());
@@ -81,6 +86,9 @@ class ChaletsRepositoryImpl implements ChaletsRepository {
         return Right(remoteChalets);
       } on ServerException {
 
+        return Left(ServerFailure());
+      } catch (e) {
+        print('❌ getChaletsMap network error: $e');
         return Left(ServerFailure());
       }
     } else {

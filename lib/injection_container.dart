@@ -1,3 +1,4 @@
+import 'package:shleehcustomer/features/buildings/domain/repositories/buildings_repository.dart';
 import 'package:shleehcustomer/features/authentication/login/data/datasources/login_data_source.dart';
 import 'package:shleehcustomer/features/authentication/login/domain/repositories/login_repository.dart';
 import 'package:shleehcustomer/features/authentication/login/domain/usecases/login_usecase.dart';
@@ -20,7 +21,18 @@ import 'package:shleehcustomer/features/booking/domain/usecases/book_chalet.dart
 import 'package:shleehcustomer/features/booking/domain/usecases/get_booking_by_id.dart';
 import 'package:shleehcustomer/features/booking/domain/usecases/get_bookings.dart';
 import 'package:shleehcustomer/features/booking/domain/usecases/payment_book.dart';
+import 'package:shleehcustomer/features/booking/domain/usecases/payment_book_qpay.dart';
+import 'package:shleehcustomer/features/booking/domain/usecases/send_qpay_otp.dart';
+import 'package:shleehcustomer/features/booking/domain/usecases/get_qpay_cards.dart';
+import 'package:shleehcustomer/features/booking/domain/usecases/confirm_qpay.dart';
 import 'package:shleehcustomer/features/booking/presentation/bloc/bookings/bookings_bloc.dart';
+import 'package:shleehcustomer/features/buildings/data/datasources/building_local_data_source.dart';
+import 'package:shleehcustomer/features/buildings/domain/usecases/get_building_by_id.dart';
+import 'package:shleehcustomer/features/buildings/domain/usecases/get_buildings.dart';
+import 'package:shleehcustomer/features/buildings/domain/usecases/get_buildings_map.dart';
+import 'package:shleehcustomer/features/buildings/domain/usecases/get_flats_by_building_id.dart';
+import 'package:shleehcustomer/features/buildings/presentation/bloc/buildings/buildings_bloc.dart';
+import 'package:shleehcustomer/features/buildings/presentation/bloc/flat/flats_bloc.dart';
 import 'package:shleehcustomer/features/chalets/data/datasources/chalet_local_data_source.dart';
 import 'package:shleehcustomer/features/chalets/data/datasources/chalet_remote_data_source.dart';
 import 'package:shleehcustomer/features/chalets/data/repositories/chalet_repository_impl.dart';
@@ -43,11 +55,16 @@ import 'package:shleehcustomer/features/settings/domain/usecases/update_user.dar
 
 import 'package:get_it/get_it.dart';
 
+import 'core/favorites/favorites_cubit.dart';
+import 'core/favorites/favorites_service.dart';
 import 'core/network/network_info.dart';
 import 'features/authentication/login/data/repositories/login_repository_impl.dart';
 import 'features/authentication/login/presentation/bloc/login/login_bloc.dart';
 import 'features/authentication/reset_password/presentation/bloc/reset/reset_password_bloc.dart';
 import 'features/booking/domain/usecases/get_dates_cost.dart';
+import 'features/buildings/data/datasources/building_remote_data_source.dart';
+import 'package:shleehcustomer/features/buildings/domain/repositories/buildings_repository.dart';
+import 'package:shleehcustomer/features/buildings/data/repositories/building_repository_impl.dart';
 import 'features/home_page/presentation/bloc/home/home_bloc.dart';
 
 import 'package:http/http.dart' as http;
@@ -69,12 +86,21 @@ Future<void> init() async {
 
   sl.registerFactory(() => ChaletsBloc(getChaletsUsecase:sl(), getChaletIdUsecase: sl(), getChaletsMapUsecase: sl()));
   sl.registerFactory(() => BookingsBloc(getBookingsUsecase: sl(), getBookingIdUsecase: sl(), getBookingDatesCostUsecase: sl(), bookingPaymentUsecase: sl(), bookChaletUsecase: sl()));
+  sl.registerFactory(() => BuildingsBloc(getBuildingsUsecase: sl(), getBuildingIdUsecase: sl(), getBuildingsMapUsecase: sl()));
+  sl.registerFactory(() => FlatsBloc(getFlatByBuildingIdUsecase: sl()));
 
 
   sl.registerFactory(() => LoginBloc(loginUsecase: sl()));
   sl.registerFactory(() => ResetBloc(resetPasswordUsecase: sl()));
   sl.registerFactory(() => LandingBloc(getOnBoardsUsecase: sl()));
   sl.registerFactory(() => RegisterBloc(registerUserUserCase: sl(),sendOtpUserCase: sl(),verifyOtpUserCase: sl(), checkUserExistedUserCase: sl()));
+
+  // Favorites — backend-synced (see FavoritesService). Registered as a
+  // factory to match this app's existing convention for every other
+  // Bloc/Cubit, but (also like every other Bloc here) it's only ever
+  // instantiated once, in the root MultiBlocProvider, so it behaves as a
+  // single shared instance.
+  sl.registerFactory(() => FavoritesCubit(sl()));
 
 
 
@@ -88,6 +114,10 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetBookingIdUsecase(sl()));
   sl.registerLazySingleton(() => GetBookingDatesCostUsecase(sl()));
   sl.registerLazySingleton(() => BookingPaymentUsecase(sl()));
+  sl.registerLazySingleton(() => BookingPaymentQpayUsecase(sl()));
+  sl.registerLazySingleton(() => SendQpayOtpUsecase(sl()));
+  sl.registerLazySingleton(() => GetQpayCardsUsecase(sl()));
+  sl.registerLazySingleton(() => ConfirmQpayUsecase(sl()));
   sl.registerLazySingleton(() => BookChaletUsecase(sl()));
 
 
@@ -103,8 +133,11 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetChaletIdUsecase(sl()));
   sl.registerLazySingleton(() => GetChaletsMapUsecase(sl()));
 
+  sl.registerLazySingleton(() => GetBuildingIdUsecase(sl()));
+  sl.registerLazySingleton(() => GetBuildingsUsecase(sl()));
+  sl.registerLazySingleton(() => GetBuildingsMapUsecase(sl()));
 
-
+  sl.registerLazySingleton(() => GetFlatByBuildingIdUsecase(sl()));
 
 // Repository
 
@@ -119,6 +152,7 @@ Future<void> init() async {
   sl.registerLazySingleton<ChaletsRepository>(() => ChaletsRepositoryImpl(remoteDataSource: sl(),localDataSource: sl(), networkInfo: sl()));
   sl.registerLazySingleton<BookingRepository>(() => BookingssRepositoryImpl(remoteDataSource: sl(), networkInfo: sl()));
 
+  sl.registerLazySingleton<BuildingsRepository>(() => BuildingsRepositoryImpl(remoteDataSource: sl(), localDataSource: sl(), networkInfo: sl()));
 
 // Datasources
   sl.registerLazySingleton<ResetPasswordDataSource>(
@@ -134,15 +168,20 @@ Future<void> init() async {
           () => RegisterDataSourceImp(client: sl()));
   sl.registerLazySingleton<ChaletRemoteDataSource>(
           () => ChaletsRemoteDataSourceImpl(client: sl()));
+
+  sl.registerLazySingleton<BuildingRemoteDataSource>(
+          () => BuildingsRemoteDataSourceImpl(client: sl()));
   sl.registerLazySingleton<ChaletLocalDataSource>(
           () => ChaletLocalDataSourceImpl(sharedPreferences: sl()));
   sl.registerLazySingleton<BookingRemoteDataSource>(
           () => BookingRemoteDataSourceImpl(client: sl()));
 
-
+  sl.registerLazySingleton<BuildingLocalDataSource>(
+          () => BuildingLocalDataSourceImpl(sharedPreferences: sl()));
 //! Core
 
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
+  sl.registerLazySingleton(() => FavoritesService(sl()));
 
 //! External
 
@@ -150,5 +189,5 @@ Future<void> init() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
   sl.registerLazySingleton(() => http.Client());
-  sl.registerLazySingleton(() => InternetConnectionChecker());
+  sl.registerLazySingleton(() => InternetConnectionChecker.instance);
 }

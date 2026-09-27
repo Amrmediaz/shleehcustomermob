@@ -30,6 +30,9 @@ class RegisterRepositoryImplementation implements RegisterRepositories {
         return const Right(unit);
       } on AuthenticationException {
         return Left(AuthenticationFailure());
+      } catch (e) {
+        print('❌ checkUserExist network error: $e');
+        return Left(ServerFailure());
       }
     } else {
       return Left(OfflineFailure());
@@ -44,6 +47,9 @@ class RegisterRepositoryImplementation implements RegisterRepositories {
         return const Right(unit);
       } on AuthenticationException {
         return Left(AuthenticationFailure());
+      } catch (e) {
+        print('❌ register network error: $e');
+        return Left(ServerFailure());
       }
     } else {
       return Left(OfflineFailure());
@@ -58,6 +64,9 @@ class RegisterRepositoryImplementation implements RegisterRepositories {
         return const Right(unit);
       } on AuthenticationException {
         return Left(AuthenticationFailure());
+      } catch (e) {
+        print('❌ sendOtpCode network error: $e');
+        return Left(ServerFailure());
       }
     } else {
       return Left(OfflineFailure());
@@ -72,6 +81,9 @@ class RegisterRepositoryImplementation implements RegisterRepositories {
         return const Right(unit);
       } on OtpException {
         return Left(OtpFailure());
+      } catch (e) {
+        print('❌ verifyOtpCode network error: $e');
+        return Left(ServerFailure());
       }
     } else {
       return Left(OfflineFailure());

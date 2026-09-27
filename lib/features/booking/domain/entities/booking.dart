@@ -18,6 +18,14 @@ class Booking extends Equatable {
   final List<String> bookingDays;
   final int buildingID;
   final int customerId;
+  final String itemName;
+  // How this booking was/is being paid — 1 = normal online bank payment,
+  // 3 = QPay installments (same paymentType values sent to
+  // BookingPayment/BookingPaymentQpay when the booking was paid). Nullable
+  // and optional since older bookings and non-online (WhatsApp transfer
+  // confirmation) bookings may not have this set by the backend.
+  final int? paymentType;
+
 
   const Booking({
     required this.id,
@@ -33,6 +41,8 @@ class Booking extends Equatable {
     required this.bookingDays,
     required this.buildingID,
     required this.customerId,
+    required this.itemName,
+    this.paymentType,
   });
 
   @override
@@ -50,5 +60,6 @@ class Booking extends Equatable {
     bookingDays,
     buildingID,
     customerId,
+    paymentType,
   ];
 }

@@ -9,8 +9,8 @@ class BookingPaymentUsecase {
 
   BookingPaymentUsecase(this.repository);
 
-  Future<Either<Failure, String>> call( {required dynamic paymentData }) async {
-    return await repository. bookPayment(paymentData: paymentData);
+  Future<Either<Failure, String>> call( {required dynamic paymentData ,  required bool isChalet }) async {
+    return await repository. bookPayment(paymentData: paymentData , isChalet : isChalet );
   }
 
 }

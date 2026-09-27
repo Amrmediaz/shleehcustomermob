@@ -42,13 +42,13 @@ class SendOtpPage extends StatelessWidget {
 
                 CommonFunctions.showBottomDialog(
                     context,
-                    Icon(
+                   icon : Icon(
                       Icons.person_pin,
                       color: primaryColor,
                       size: CommonFunctions.calculateIconSize(context),
                     ),
-                    getTextByKey(key: TranslationKey.keyExistUser),
-                    getTextByKey(key: TranslationKey.keyLoginExistUser));
+                   title:  getTextByKey(key: TranslationKey.keyExistUser),
+                   description:  getTextByKey(key: TranslationKey.keyLoginExistUser));
               } else if (state is MessageSendOtpState) {
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (_) => (VerifyOtpPage(

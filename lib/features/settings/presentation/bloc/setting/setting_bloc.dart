@@ -68,9 +68,9 @@ class SettingBloc extends Bloc<SettingEvent, SettingState> {
   String _mapFailureToMessage(Failure failure) {
     switch (failure.runtimeType) {
       case ServerFailure:
-        return SERVER_FAILURE_MESSAGE;
+        return getTextByKey(key: TranslationKey.keyServerError);
       case EmptyCacheFailure:
-        return EMPTY_CACHE_FAILURE_MESSAGE;
+        return getTextByKey(key: TranslationKey.keyNoData);
       case OfflineFailure:
         return getTextByKey(key: TranslationKey.keyNoInternet);
       default:

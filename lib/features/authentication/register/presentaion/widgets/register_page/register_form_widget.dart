@@ -38,6 +38,17 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
   }
 
   @override
+  void dispose() {
+    _phoneController.dispose();
+    _emailController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _passwordController.dispose();
+    _passwordMatchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Form(
         key: _formKey,

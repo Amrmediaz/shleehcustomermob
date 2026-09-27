@@ -14,11 +14,11 @@ class PriceWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.all(6),
-      padding: const EdgeInsets.all(14),
+      margin: EdgeInsets.all(6),
+      padding: EdgeInsets.all(6),
       decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: primaryColor, width: 0.3),
+          border: Border.all(color: greyColorTxt, width: 0.5),
           borderRadius: BorderRadius.all(Radius.circular(8))),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

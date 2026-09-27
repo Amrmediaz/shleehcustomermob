@@ -2,6 +2,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shleehcustomer/core/util/cashed_data/cashed_file.dart';
 import 'package:shleehcustomer/features/authentication/login/presentation/bloc/login/login_event.dart';
@@ -79,9 +80,15 @@ class CommonFunctions {
     }).join('');
   }
   static int pageNumberBookings= 1 ;
+ static int pageNumberBookingsBildings= 1 ;
+
+ static int pageNumberbuildings = 1 ;
+ static int pageNumberFilterBuildings = 1 ;
+
 
   static int pageNumberChalets = 1 ;
   static int pageNumberFilterChalets = 1 ;
+ static int pageNumberFillterChalets = 1 ;
 
   static bool fromHighToLowPrice = true ;
   static bool fromHighToLowRate = true ;
@@ -118,40 +125,127 @@ static double getSafeAreaTip(BuildContext context){
       transitionDuration: const Duration(seconds: 1),
     );
   }
-  static  showBottomDialog(BuildContext context,Icon icon , String title,String description) {
-    showModalBottomSheet(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(DEFAULT_CORNER)),
-      ),
-      context: context,
+ static showBottomDialog(
+     BuildContext context, {
+       required Icon icon,
+       required String title,
+       required String description,
+       String? buttonText,
+       VoidCallback? onButtonPressed,
+       bool isDanger = false,
+     }) {
+   showModalBottomSheet(
+     context: context,
+     shape: const RoundedRectangleBorder(
+       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+     ),
+     backgroundColor: Colors.white,
+     isScrollControlled: true,
+     builder: (BuildContext context) {
+       return SafeArea(
+         child: Container(
+           width: double.infinity,
+           padding: EdgeInsets.fromLTRB(
+             20,
+             24,
+             20,
+             20 + MediaQuery.of(context).viewInsets.bottom,
+           ),
+           child: Column(
+             mainAxisSize: MainAxisSize.min,
+             children: [
+               // ✅ Drag Handle
+               Container(
+                 width: 40,
+                 height: 4,
+                 decoration: BoxDecoration(
+                   color: Colors.grey[300],
+                   borderRadius: BorderRadius.circular(2),
+                 ),
+               ),
+               const SizedBox(height: 20),
 
-      builder: (BuildContext context) {
+               // ✅ Icon with Background
+               Container(
+                 padding: const EdgeInsets.all(16),
+                 decoration: BoxDecoration(
+                   color: isDanger
+                       ? Colors.red.withOpacity(0.1)
+                       : const Color(0xFF6366F1).withOpacity(0.1),
+                   borderRadius: BorderRadius.circular(16),
+                 ),
+                 child: IconTheme(
+                   data: IconThemeData(
+                     color: isDanger ? Colors.red : const Color(0xFF6366F1),
+                     size: 32,
+                   ),
+                   child: icon,
+                 ),
+               ),
+               const SizedBox(height: 20),
 
-        return  Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              icon,
-              const SizedBox(height: 16.0),
-              Text(
-               title,
-                style: TextStyles.textStyleTitle(context),
-              ),
-              const SizedBox(height: 12.0),
-              Text(
-                description,
-                textAlign: TextAlign.center,
-                  style: TextStyles.textStyleHelper(context)
-              ),
-               SizedBox(height: 20),
-            ],
-          ),
-        );
-      },
-    );
-  }
-  static  showBottomWidgetDialog(BuildContext context,Widget titleView , Widget item,) {
+               // ✅ Title
+               Text(
+                 title,
+                 textAlign: TextAlign.center,
+                 style: const TextStyle(
+                   fontSize: 18,
+                   fontWeight: FontWeight.w800,
+                   color: Color(0xFF1A1F2E),
+                   letterSpacing: 0.3,
+                 ),
+               ),
+               const SizedBox(height: 12),
+
+               // ✅ Description
+               Text(
+                 description,
+                 textAlign: TextAlign.center,
+                 style: TextStyle(
+                   fontSize: 13,
+                   fontWeight: FontWeight.w400,
+                   color: Colors.grey[600],
+                   height: 1.6,
+                 ),
+               ),
+               const SizedBox(height: 28),
+
+               // ✅ Action Button
+               SizedBox(
+                 width: double.infinity,
+                 child: ElevatedButton(
+                   onPressed: () {
+                     Navigator.pop(context);
+                     onButtonPressed?.call();
+                   },
+                   style: ElevatedButton.styleFrom(
+                     backgroundColor: isDanger
+                         ? Colors.red
+                         : const Color(0xFF6366F1),
+                     foregroundColor: Colors.white,
+                     padding: const EdgeInsets.symmetric(vertical: 16),
+                     shape: RoundedRectangleBorder(
+                       borderRadius: BorderRadius.circular(12),
+                     ),
+                     elevation: 0,
+                   ),
+                   child: Text(
+                     buttonText ?? 'حسناً',
+                     style: const TextStyle(
+                       fontSize: 14,
+                       fontWeight: FontWeight.w700,
+                       letterSpacing: 0.3,
+                     ),
+                   ),
+                 ),
+               ),
+             ],
+           ),
+         ),
+       );
+     },
+   );
+ }  static  showBottomWidgetDialog(BuildContext context,Widget titleView , Widget item,) {
     showModalBottomSheet(
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(DEFAULT_CORNER)),
@@ -175,16 +269,49 @@ static double getSafeAreaTip(BuildContext context){
       },
     );
   }
-  static sendMessageToWhatsApp(String messageWh) async {
-    // Replace 'your_message_here' with the message you want to send
-    String message = Uri.encodeFull(messageWh);
-    String url = "https://wa.me/96893866893?text=$message";
 
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url));
-    } else {
-      throw 'Could not launch $url';
-    }
+// ✅ Fixed WhatsApp function
+  static Future<void> sendMessageToWhatsApp(
+      BuildContext context,
+      String messageWh,
+      ) async {
+    final encodedMessage = Uri.encodeComponent(messageWh);
+    const phoneNumber = "96893866893";
+
+    final whatsappSchema = Uri.parse("whatsapp://send?phone=$phoneNumber&text=$encodedMessage");
+    final whatsappHttps = Uri.parse("https://wa.me/$phoneNumber?text=$encodedMessage");
+
+    try {
+      if (await launchUrl(whatsappSchema, mode: LaunchMode.externalApplication)) return;
+    } catch (_) {/* fall through */}
+
+    try {
+      if (await launchUrl(whatsappHttps, mode: LaunchMode.externalApplication)) return;
+    } catch (_) {/* fall through */}
+
+    await Clipboard.setData(ClipboardData(text: "+$phoneNumber"));
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'تم نسخ رقم الدعم: +$phoneNumber\nيمكنك الآن فتح واتس آب يدويًا',
+                style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.green.shade600,
+        duration: const Duration(seconds: 4),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
   }
 
   static delay(VoidCallback action, {required int seconds}) {

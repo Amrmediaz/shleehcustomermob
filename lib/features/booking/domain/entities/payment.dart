@@ -13,7 +13,7 @@ class PaymentDetails extends Equatable {
   final int bookingId;
   final double currentPaid;
 
-  final ChaletDetails chalet;
+  final dynamic chalet;
   final List<Map<String, dynamic>> bookingDaysCalculatePrice ;
 
 

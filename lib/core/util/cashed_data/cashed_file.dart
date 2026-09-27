@@ -13,6 +13,14 @@ class CasheFile {
   static bool isLoginUser = false;
   static bool isTablet = false;
 
+  // Shared, always-current profile — every screen that shows the user's
+  // name (e.g. the home page greeting) should read this instead of calling
+  // loadUser() once and caching it locally, so an edit made on the profile
+  // screen shows up immediately everywhere else without needing to leave
+  // and re-enter the tab (persistent_bottom_nav_bar keeps tabs' State alive,
+  // so initState-only loads never re-run on tab switch).
+  static final ValueNotifier<UserProfile?> currentUser = ValueNotifier<UserProfile?>(null);
+
   late SharedPreferences prefs;
   CasheFile() {
     _initPrefs();
@@ -68,9 +76,7 @@ class CasheFile {
     await prefs.setBool(IS_LOGIN, isLogined);
   }
   Future<void> setLogout(BuildContext context) async {
-
-    Navigator.of(context, rootNavigator: true)
-        .pushAndRemoveUntil(
+    Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
       MaterialPageRoute(
         builder: (BuildContext context) {
           return const LoginPage();
@@ -82,6 +88,7 @@ class CasheFile {
     isLoginUser = false;
     await prefs.setBool(IS_LOGIN, false);
     await prefs.remove(USER_TOKEN);
+    await prefs.remove('shleeh_customer_email'); // clear saved booking email so the next login starts fresh
   }
   Future<bool> isLogin() async {
     await _initPrefs();
@@ -97,6 +104,7 @@ class CasheFile {
     final prefs = await SharedPreferences.getInstance();
     String userJson = jsonEncode(user.toJson());
     await prefs.setString(USER_PROFILE, userJson);
+    currentUser.value = user;
   }
   static Future<UserProfile?> loadUser() async {
     print("okkk");
@@ -104,7 +112,9 @@ class CasheFile {
     String? userJson = prefs.getString(USER_PROFILE);
     if (userJson != null) {
       Map<String, dynamic> userMap = jsonDecode(userJson);
-      return UserProfile.fromJson(userMap);
+      final profile = UserProfile.fromJson(userMap);
+      currentUser.value = profile;
+      return profile;
     }
     return null;
   }

@@ -11,34 +11,26 @@ import '../bloc/bookings/bookings_bloc.dart';
 import '../widgets/payment/payment_bank_web_widget.dart';
 
 class PaymentBankWebViewScreen extends StatelessWidget {
-  final String paymentId;
-
-  const PaymentBankWebViewScreen(
-      {super.key, required this.paymentId,});
+  final String paymentUrl;
+  const PaymentBankWebViewScreen({super.key, required this.paymentUrl});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: SafeArea(child: _buildBody(context)));
-  }
+    return Scaffold(
+      body: SafeArea(
+        child: Container(margin: PADDING_PAGE,child:  Column(
+          children: [
 
-  Widget _buildBody(BuildContext context) {
-    return WillPopScope(
-        onWillPop: () async {
-          Navigator.pop(context);
-          return true;
-        },
-        child: ListView(
-            physics: NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            padding: PADDING_PAGE, children: [
-          AppBarBack(leadingWidgetAction: () {
-            Navigator.pop(context);
-          }),
-          PaymentBankWebViewWidget(
-            paymentId: paymentId,
-          )
-        ]));
+            AppBarBack(leadingWidgetAction: () => Navigator.pop(context)),
+            Expanded(
+              child: PaymentBankWebViewWidget(paymentUrl: paymentUrl),
+            ),
+          ],
+        ),
+      ),
+    ));
   }
+}
 
   moveToBookings(BuildContext context) {
     CommonFunctions.pageNumberBookings = 1;
@@ -51,4 +43,4 @@ class PaymentBankWebViewScreen extends StatelessWidget {
       (Route<dynamic> route) => false,
     );
   }
-}
+

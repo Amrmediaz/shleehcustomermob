@@ -2,7 +2,8 @@ import 'package:flutter/services.dart';
 
 enum PaymentMethod {
   transferBanking ,
-  onlineBanking
+  onlineBanking ,
+  qpay
 }
 
 

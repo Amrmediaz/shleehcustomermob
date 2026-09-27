@@ -35,7 +35,9 @@ class ActionBtn extends StatelessWidget {
                     width: 0.7) // Adjust the radius as needed
                 ),
           ),
-          onPressed: onPressed,
+          // Disable while loading so a slow network response can't be
+          // double-tapped into a duplicate booking/payment/submit request.
+          onPressed: isLoading == true ? null : onPressed,
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Visibility(
                 visible: isLoading == null

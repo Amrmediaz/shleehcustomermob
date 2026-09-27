@@ -10,6 +10,8 @@ class ChaletDetailsModel extends ChaletDetails {
     required String rentHalfday,
     required String rentHalfdayDisCount,
     required String buldingDescrption,
+    required int minDays,
+
     required String note,
     required String state,
     required String gouvernate,
@@ -34,6 +36,10 @@ class ChaletDetailsModel extends ChaletDetails {
     required List<dynamic> discountHalfDate,
     required List<Map<String, dynamic>> buldingComment,
     required int apartmentOwnerId,
+    bool todayOfferEnabled = false,
+    int todayOfferPercent = 0,
+    int todayOfferTriggerHour = 12,
+    bool todayOfferActive = false,
   }) : super(
     id: id,
     name: name,
@@ -50,6 +56,7 @@ class ChaletDetailsModel extends ChaletDetails {
     showComments: showComments,
     isActive: isActive,
     stopBook: stopBook,
+    minDays: minDays,
     offDayPriceFullday: offDayPriceFullday,
     offDayPriceHalfday: offDayPriceHalfday,
     crreatedDate: crreatedDate,
@@ -66,25 +73,30 @@ class ChaletDetailsModel extends ChaletDetails {
     discountHalfDate: discountHalfDate,
     buldingComment: buldingComment,
     apartmentOwnerId: apartmentOwnerId,
+    todayOfferEnabled: todayOfferEnabled,
+    todayOfferPercent: todayOfferPercent,
+    todayOfferTriggerHour: todayOfferTriggerHour,
+    todayOfferActive: todayOfferActive,
   );
 
   factory ChaletDetailsModel.fromJson(Map<String, dynamic> json) {
     return ChaletDetailsModel(
-      id: json['id'] ?? 0,
-      name: json['name'] ?? "",
-      rentFullday: json['rentFullday'] ?? "",
+      id: json['id'],
+      name: json['name'],
+      minDays : json['minDays'] ?? 0,
+      rentFullday: json['rentFullday'],
       rentFulldayDisCount: json['rentFulldayDisCount'] ?? "",
-      rentHalfday: json['rentHalfday'] ?? "",
+      rentHalfday: json['rentHalfday'],
       rentHalfdayDisCount: json['rentHalfdayDisCount'] ?? "",
-      buldingDescrption: json['buldingDescrption'] ?? "",
-      note: json['note'] ?? "",
-      state: json['state'] ?? "",
-      gouvernate: json['gouvernate'] ?? "",
-      lat: json['lat'] ?? 0.0,
-      lng: json['lng'] ?? 0.0,
-      showComments: json['showComments'] ?? false,
-      isActive: json['isActive'] ?? false,
-      stopBook: json['stopBook'] ?? true,
+      buldingDescrption: json['buldingDescrption'],
+      note: json['note'],
+      state: json['state'],
+      gouvernate: json['gouvernate'],
+      lat: json['lat'],
+      lng: json['lng'],
+      showComments: json['showComments'],
+      isActive: json['isActive'],
+      stopBook: json['stopBook'],
       offDayPriceFullday: json['offDayPriceFullday'] ?? "",
       offDayPriceHalfday: json['offDayPriceHalfday'] ?? "",
       crreatedDate: json['crreatedDate'] ?? "",
@@ -101,6 +113,11 @@ class ChaletDetailsModel extends ChaletDetails {
       discountHalfDate: List<dynamic>.from(json['discountHalfDate']),
       buldingComment: List<Map<String, dynamic>>.from(json['buldingComment']),
       apartmentOwnerId: json['apartmentOwnerId'],
+      todayOfferEnabled: json['todayOfferEnabled'] as bool? ?? false,
+      todayOfferPercent: (json['todayOfferPercent'] as num?)?.toInt() ?? 0,
+      todayOfferTriggerHour:
+          (json['todayOfferTriggerHour'] as num?)?.toInt() ?? 12,
+      todayOfferActive: json['todayOfferActive'] as bool? ?? false,
     );
   }
 
@@ -137,6 +154,10 @@ class ChaletDetailsModel extends ChaletDetails {
       'discountHalfDate': discountHalfDate,
       'buldingComment': buldingComment,
       'apartmentOwnerId': apartmentOwnerId,
+      'todayOfferEnabled': todayOfferEnabled,
+      'todayOfferPercent': todayOfferPercent,
+      'todayOfferTriggerHour': todayOfferTriggerHour,
+      'todayOfferActive': todayOfferActive,
     };
   }
 }

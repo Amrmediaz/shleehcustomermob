@@ -2,8 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gif/gif.dart';
 import 'package:shleehcustomer/features/authentication/login/presentation/pages/login_page.dart';
+import 'package:shleehcustomer/features/authentication/login/presentation/pages/biometric_login_page.dart';
 import 'package:shleehcustomer/features/home_page/presentation/pages/home_page.dart';
 
+import '../../../../core/util/biometric_auth.dart';
 import '../../../../core/util/cashed_data/cashed_file.dart';
 import '../../../../core/util/common_functions.dart';
 import 'landing_screen.dart';
@@ -70,10 +72,25 @@ class _LaunchScreenState extends State<LaunchScreen>
             builder: (_) => const LoginPage()),
       );
     } else {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-            builder: (_) => const HomePage()),
-      );
+      // There's a saved session — gate it behind a biometric check if the
+      // guest has enabled fingerprint/Face ID login; otherwise go straight
+      // to the home page like before.
+      final biometricEnabled = await BiometricPrefs.isEnabled();
+      if (!mounted) return;
+
+      if (!biometricEnabled) {
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const HomePage()),
+        );
+      } else {
+        // Hand off to the dedicated biometric-login screen instead of
+        // firing the native prompt straight over the splash branding —
+        // that used to pop up instantly and cover the logo/animation
+        // before it even finished playing.
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const BiometricLoginPage()),
+        );
+      }
     }
     setState(() {});
   }

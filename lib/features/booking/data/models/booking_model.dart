@@ -1,5 +1,13 @@
 import '../../domain/entities/booking.dart';
 
+// Parses paymentType defensively — backend may send it as an int, a numeric
+// string, or omit it entirely on older/non-online bookings.
+int? _parsePaymentType(dynamic raw) {
+  if (raw == null) return null;
+  if (raw is int) return raw;
+  return int.tryParse(raw.toString());
+}
+
 class BookingModel extends Booking {
   BookingModel({
     required super.id,
@@ -15,9 +23,11 @@ class BookingModel extends Booking {
     required super.bookingDays,
     required super.buildingID,
     required super.customerId,
+    required super.itemName,
+    super.paymentType,
   });
 
-  factory BookingModel.fromJson(Map<String, dynamic> json) {
+  factory BookingModel.fromJson(Map<String, dynamic> json , bool isChalet  ) {
     return BookingModel(
       id: json['id'],
       name: json['name'],
@@ -29,13 +39,16 @@ class BookingModel extends Booking {
       note: json['note'],
       createdDate: json['crreatedDate'],
       bookingStatus: json['bookingstatus'],
-      bookingDays: List<String>.from(json['bookingDays']),
-      buildingID: json['buildingID'],
+      bookingDays: List<String>.from(isChalet ? json['bookingDays'] : json['hotelbuildingBookingDays'] ?? []),
+      buildingID: isChalet ? json[ 'buildingID'] : json['flatID'],
       customerId: json['customerId'],
+      itemName: isChalet ? json['buildingNameEn'] : json['buildingNameAr'],
+      paymentType: _parsePaymentType(json['paymentType']),
     );
   }
 
-  Map<String, dynamic> toJson() {
+
+  Map<String, dynamic> toJson(bool isChalet) {
     return {
       'id': id,
       'name': name,
@@ -47,7 +60,7 @@ class BookingModel extends Booking {
       'note': note,
       'crreatedDate': createdDate,
       'bookingstatus': bookingStatus,
-      'bookingDays': bookingDays,
+     isChalet ? 'bookingDays' :"hotelbuildingBookingDays": bookingDays,
       'buildingID': buildingID,
       'customerId': customerId,
     };

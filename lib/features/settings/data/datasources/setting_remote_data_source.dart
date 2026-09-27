@@ -31,7 +31,7 @@ class SettingRemoteDataSourceImpl implements SettingRemoteDataSource {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token"
       },
-    );
+    ).timeout(const Duration(seconds: 20));
     print(response.statusCode);
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseBody = json.decode(response.body);
@@ -57,7 +57,7 @@ class SettingRemoteDataSourceImpl implements SettingRemoteDataSource {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token"
       },
-    );
+    ).timeout(const Duration(seconds: 20));
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseBody = json.decode(response.body);
       if (responseBody["status"] == true) {
@@ -80,7 +80,7 @@ class SettingRemoteDataSourceImpl implements SettingRemoteDataSource {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token"
       },
-    );
+    ).timeout(const Duration(seconds: 20));
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseBody = json.decode(response.body);
       if (responseBody["status"] == true) {

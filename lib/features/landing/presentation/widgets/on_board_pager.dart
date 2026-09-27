@@ -33,6 +33,12 @@ class _OnBoardPageWidgetState extends State<OnBoardPageWidget> {
   }
 
   @override
+  void dispose() {
+    pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [

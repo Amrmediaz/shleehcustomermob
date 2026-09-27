@@ -20,6 +20,16 @@ final appTheme = ThemeData(
     colorScheme: ColorScheme.light(
       primary: primaryColor,
     ),
+    // Smooth fade+scale transition for every screen change in the app,
+    // instead of the platform-default (which on Android is an abrupt
+    // slide-in-from-right with no fade — this applies everywhere without
+    // touching each individual Navigator.push call site).
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: _FadeScalePageTransitionsBuilder(),
+        TargetPlatform.iOS: _FadeScalePageTransitionsBuilder(),
+      },
+    ),
     progressIndicatorTheme: ProgressIndicatorThemeData(color: primaryColor),
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: primaryColor,
@@ -36,3 +46,30 @@ final appTheme = ThemeData(
           borderSide: BorderSide(color: primaryColor),
           borderRadius: BorderRadius.circular(8),
         )));
+
+/// A subtle fade + slight-slide-up transition, smoother and less jarring
+/// than the platform default page transitions.
+class _FadeScalePageTransitionsBuilder extends PageTransitionsBuilder {
+  const _FadeScalePageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final curved = CurvedAnimation(parent: animation, curve: Curves.easeOut);
+    return FadeTransition(
+      opacity: curved,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.03),
+          end: Offset.zero,
+        ).animate(curved),
+        child: child,
+      ),
+    );
+  }
+}

@@ -6,7 +6,9 @@ import 'package:shleehcustomer/core/styles/text/text_style.dart';
 import '../styles/app_theme.dart';
 
 class NoDataWidget extends StatelessWidget {
-  const NoDataWidget({super.key});
+  final String? text;
+
+  const NoDataWidget({super.key, this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -25,10 +27,20 @@ class NoDataWidget extends StatelessWidget {
         const SizedBox(
           height: 15,
         ),
-        Text(
+        if (text == null)  Text(
           getTextByKey(key: TranslationKey.keyNoData),
           style: TextStyles.textStyleTitle(context, titleSizeFactor: 0.8),
-        )
+        ),
+        if (text != null) ...[
+          const SizedBox(
+            height: 8,
+          ),
+          Text(
+            text!,
+            textAlign: TextAlign.center,
+            style: TextStyles.textStyleTitle(context, titleSizeFactor: 0.6),
+          ),
+        ],
       ],
     );
   }

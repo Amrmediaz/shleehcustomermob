@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:shleehcustomer/core/strings/language.dart';
 import 'package:shleehcustomer/core/styles/app_theme.dart';
 import 'package:shleehcustomer/core/util/common_functions.dart';
@@ -77,9 +77,9 @@ class _PrivacyWidgetState extends State<PrivacyWidget> {
             } else if (url == FAIL_URL) {
               CommonFunctions.showBottomDialog(
                   context,
-                  const Icon(Icons.error_outline_sharp),
-                  getTextByKey(key: TranslationKey.keyFailPayment),
-                  getTextByKey(key: TranslationKey.keyFailPayment));
+                icon:   const Icon(Icons.error_outline_sharp),
+                title:   getTextByKey(key: TranslationKey.keyFailPayment),
+               description:    getTextByKey(key: TranslationKey.keyFailPayment));
             }
           },
           onPageFinished: (String url) {

@@ -26,6 +26,9 @@ class ResetPasswordRepositoryImpl implements ResetPasswordRepositories {
         return Right(unit);
       } on ResetPasswordException {
         return Left(ResetPasswordFailure());
+      } catch (e) {
+        print('❌ resetPassword network error: $e');
+        return Left(ServerFailure());
       }
     } else {
       return Left(OfflineFailure());

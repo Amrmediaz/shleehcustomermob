@@ -1,5 +1,6 @@
 
 
+import '../entities/PaginatedBookings.dart';
 import '../repositories/booking_repository.dart';
 import 'package:dartz/dartz.dart';
 
@@ -11,8 +12,8 @@ class GetBookingsUsecase {
 
   GetBookingsUsecase(this.repository);
 
-  Future<Either<Failure, List<Booking>>> call( {required int pageSize ,required int pageNum }) async {
-    return await repository. getBooking(pageSize:pageSize ,pageNum:pageNum );
+  Future<Either<Failure, PaginatedBookings>> call( {required int pageSize ,required int pageNum , required bool isChalet  }) async {
+    return await repository. getBooking(pageSize:pageSize ,pageNum:pageNum ,  isChalet : isChalet  );
   }
 
 }

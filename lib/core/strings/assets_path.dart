@@ -6,12 +6,12 @@ class AssetsPath {
   static const String privacySvg = "assets/images/setting/privacy.svg";
   static const String backSvg = "assets/images/appbar/back.svg";
 
-  // chalets
-  static const String map = "assets/images/chalets/map.svg";
-  static const String filter = "assets/images/chalets/filter.svg";
-  static const String bankMuscat = "assets/images/chalets/bankmuscat.png";
-  static const String bankDohfar = "assets/images/chalets/dohfarbank.png";
-  static const String visaImg = "assets/images/chalets/visa.svg";
+  // buildings
+  static const String map = "assets/images/buildings/map.svg";
+  static const String filter = "assets/images/buildings/filter.svg";
+  static const String bankMuscat = "assets/images/buildings/bankmuscat.png";
+  static const String bankDohfar = "assets/images/buildings/dohfarbank.png";
+  static const String visaImg = "assets/images/buildings/visa.svg";
 
 
   //appbar

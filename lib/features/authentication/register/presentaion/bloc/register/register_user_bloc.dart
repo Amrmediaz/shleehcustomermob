@@ -29,7 +29,6 @@ class RegisterBloc
         required this.registerUserUserCase , required this.sendOtpUserCase ,required this.verifyOtpUserCase,required this.checkUserExistedUserCase})
       : super(RegisterUserInitial()) {
     on<RegisterUserEvent>((event, emit) async {
-      print("okkkk");
       if (event is RegisterUseEvent) {
         emit(LoadingRegisterUserState());
         final failureOrDoneMessage = await registerUserUserCase(event.userRegister);
@@ -78,7 +77,6 @@ class RegisterBloc
   }
   RegisterUserState _eitherDoneMessageOrErrorCheckUserExistedState(
       Either<Failure, Unit> either, String message) {
-    print("okx");
     return either.fold(
           (failure) => ErrorCheckExistedUserState(
         message: _mapFailureToMessage(failure),

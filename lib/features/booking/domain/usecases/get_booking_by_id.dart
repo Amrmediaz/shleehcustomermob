@@ -10,8 +10,8 @@ class GetBookingIdUsecase {
 
   GetBookingIdUsecase(this.repository);
 
-  Future<Either<Failure, BookingDetails>> call( {required int id }) async {
-    return await repository.getBookingyID(id: id);
+  Future<Either<Failure, BookingDetails>> call( {required int id  , required bool isChalet}) async {
+    return await repository.getBookingyID(id: id , isChalet: isChalet);
   }
 
 }

@@ -1,7 +1,15 @@
 import '../../domain/entities/booking.dart';
 import '../../domain/entities/booking_details_model.dart';
 
-  class BookingDetailsModel extends BookingDetails {
+// Parses paymentType defensively — backend may send it as an int, a
+// numeric string, or omit it entirely on older/non-online bookings.
+int? _parsePaymentType(dynamic raw) {
+  if (raw == null) return null;
+  if (raw is int) return raw;
+  return int.tryParse(raw.toString());
+}
+
+class BookingDetailsModel extends BookingDetails {
   final int id;
   final String name;
   final String phone;
@@ -17,6 +25,15 @@ import '../../domain/entities/booking_details_model.dart';
   final int buildingID;
   final int customerId;
   final String crreatedDate;
+
+  // ── New fields ──────────────────────────────────────────────────────
+  final String? currentPaid;
+  final String? remainingPaid;
+  final String? customerNotes;
+  final String? customerEmail;
+  final int? paymentType;
+  final bool? isLoan;
+  final String? loanId;
 
   BookingDetailsModel({
     required this.id,
@@ -34,25 +51,39 @@ import '../../domain/entities/booking_details_model.dart';
     this.buildingRate,
     required this.buildingID,
     required this.customerId,
+    this.currentPaid,
+    this.remainingPaid,
+    this.customerNotes,
+    this.customerEmail,
+    this.paymentType,
+    this.isLoan,
+    this.loanId,
   }) : super(
-          id: id,
-          name: name,
-          phone: phone,
-          state: state,
-          gouvernate: gouvernate,
-          coast: coast,
-          noOfDays: noOfDays,
-          note: note,
-          crreatedDate: crreatedDate,
-          insuranceAmount: insuranceAmount,
-          paidAmount: paidAmount,
-          bookingDays: bookingDays,
-          buildingRate: buildingRate,
-          buildingID: buildingID,
-          customerId: customerId,
-        );
+    id: id,
+    name: name,
+    phone: phone,
+    state: state,
+    gouvernate: gouvernate,
+    coast: coast,
+    noOfDays: noOfDays,
+    note: note,
+    crreatedDate: crreatedDate,
+    insuranceAmount: insuranceAmount,
+    paidAmount: paidAmount,
+    bookingDays: bookingDays,
+    buildingRate: buildingRate,
+    buildingID: buildingID,
+    customerId: customerId,
+    currentPaid: currentPaid,
+    remainingPaid: remainingPaid,
+    customerNotes: customerNotes,
+    customerEmail: customerEmail,
+    paymentType: paymentType,
+    isLoan: isLoan,
+    loanId: loanId,
+  );
 
-  factory BookingDetailsModel.fromJson(Map<String, dynamic> json) {
+  factory BookingDetailsModel.fromJson(Map<String, dynamic> json, bool isChalet) {
     return BookingDetailsModel(
       id: json['id'],
       name: json['name'],
@@ -66,11 +97,18 @@ import '../../domain/entities/booking_details_model.dart';
       insuranceAmount: json['insuranceamount'],
       paidAmount: json['paidamount'],
       bookingDays: List<BookingDay>.from(
-          json['bookingDays'].map((item) => BookingDay.fromJson(item))),
+          json[isChalet ? 'bookingDays' : "hotelbuildingBookingDays"].map((item) => BookingDay.fromJson(item))),
       buildingRate:
-          json['buildingRate'] != null ? json['buildingRate'].toDouble() : null,
-      buildingID: json['buildingID'],
+      json['buildingRate'] != null ? json['buildingRate'].toDouble() : null,
+      buildingID: isChalet ? json['buildingID'] : json['flatID'],
       customerId: json['customerId'],
+      currentPaid: json['current_paid'],
+      remainingPaid: json['remaining_paid'],
+      customerNotes: json['customer_notes'],
+      customerEmail: json['customer_email'],
+      paymentType: _parsePaymentType(json['paymentType']),
+      isLoan: json['isLoan'] as bool?,
+      loanId: json['loanId']?.toString(),
     );
   }
 
@@ -87,6 +125,10 @@ import '../../domain/entities/booking_details_model.dart';
       'buildingRate': buildingRate,
       'buildingID': buildingID,
       'customerId': customerId,
+      'current_paid': currentPaid,
+      'remaining_paid': remainingPaid,
+      'customer_notes': customerNotes,
+      'customer_email': customerEmail,
     });
     return json;
   }

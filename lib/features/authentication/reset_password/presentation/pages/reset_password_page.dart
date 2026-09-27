@@ -34,11 +34,11 @@ class ResetPasswordPage extends StatelessWidget {
               if (state is MessageResetPasswordState) {
                 await CommonFunctions.showBottomDialog(
                     context,
-                    Icon(Icons.check_circle,
+                 icon:    Icon(Icons.check_circle,
                         color: Colors.green, size: CommonFunctions.calculateIconSize(context)),
-                    getTextByKey(
+                  title:   getTextByKey(
                         key: TranslationKey.keyResetPasswordSuccessMessage),
-                    "");
+                   description:  "");
                 await CommonFunctions.delay(() {
                   Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(builder: (_) => const LoginPage()),
@@ -49,11 +49,11 @@ class ResetPasswordPage extends StatelessWidget {
                    // message: state.message, context: context);
                 await CommonFunctions.showBottomDialog(
                     context,
-                    Icon(Icons.error,
+                 icon:    Icon(Icons.error,
                         color: Colors.red, size: CommonFunctions.calculateIconSize(context)),
-                    getTextByKey(
+                  title:   getTextByKey(
                         key: TranslationKey.keyResetPasswordFailedMessage),
-                    "");
+                  description:   "");
               }
             },
             builder: (context, state) {

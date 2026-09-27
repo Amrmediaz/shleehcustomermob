@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:shleehcustomer/core/strings/language.dart';
+import 'package:shleehcustomer/features/booking/domain/entities/PaginatedBookings.dart';
 import 'package:shleehcustomer/features/booking/domain/usecases/get_bookings.dart';
 import '../../../../../core/error/failures.dart';
 import 'package:dartz/dartz.dart';
@@ -21,63 +22,130 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingState> {
   final BookChaletUsecase bookChaletUsecase;
   final BookingPaymentUsecase bookingPaymentUsecase;
 
-  BookingsBloc({required this.getBookingsUsecase,required this.getBookingIdUsecase , required this.getBookingDatesCostUsecase , required this.bookingPaymentUsecase,required this.bookChaletUsecase
-  } ) : super(BookingInitial()) {
+  BookingsBloc({
+    required this.getBookingsUsecase,
+    required this.getBookingIdUsecase,
+    required this.getBookingDatesCostUsecase,
+    required this.bookingPaymentUsecase,
+    required this.bookChaletUsecase,
+  }) : super(BookingInitial()) {
     on<BookingsEvent>((event, emit) async {
       if (event is GetAllBookingsEvent) {
         emit(LoadingBookingsState());
-        final failureOrPosts = await getBookingsUsecase(pageNum: event.pageNumber , pageSize: event.pageSize);
-        emit(_mapFailureOrPostsToState(failureOrPosts,event.pageNumber));
+        final failureOrPosts = await getBookingsUsecase(
+            pageNum: event.pageNumber, pageSize: event.pageSize, isChalet: true);
+        emit(_mapFailureOrPostsToState(failureOrPosts));
       }
-     else if (event is BookingsEventIni) {
-        emit(BookingStateInitial());
 
+      else if (event is GetAllBookingsEventFlat) {
+        emit(LoadingBookingsStateFlat());
+        final failureOrPosts = await getBookingsUsecase(
+            pageNum: event.pageNumber, pageSize: event.pageSize, isChalet: false);
+        emit(_mapFailureOrPostsToStateFlat(failureOrPosts));
       }
+
+      else if (event is BookingsEventIni) {
+        emit(BookingStateInitial());
+      }
+
       else if (event is CalculateBookingTotalPriceEvent) {
         emit(LoadingBookingTotalPriceState());
-        final failureOrPosts = await getBookingDatesCostUsecase(dates:event.dates);
+        final failureOrPosts =
+        await getBookingDatesCostUsecase(dates: event.dates, isChalet: event.isChalet);
         emit(_mapFailureOrBookingTotalPriceToState(failureOrPosts));
       }
-      else if  (event is LoadMoreBookingsEvent) {
-       // emit(LoadingChaletsState());
-        final failureOrPosts = await getBookingsUsecase(pageNum: event.pageNumber , pageSize: event.pageSize);
-        emit(_mapFailureOrPostsToState(failureOrPosts,event.pageNumber));
-      } else if (event is RefreshBookingsEvent) {
-      //  emit(LoadingChaletsState());
-        final failureOrPosts = await getBookingsUsecase(pageNum: event.pageNumber , pageSize: event.pageSize);
-        emit(_mapFailureOrPostsToState(failureOrPosts,event.pageNumber));
-      } else if (event is LoadBookingsById) {
+
+      else if (event is LoadMoreBookingsEvent) {
+        final failureOrPosts = await getBookingsUsecase(
+            pageNum: event.pageNumber, pageSize: event.pageSize, isChalet: event.isChalet);
+
+        if (event.isChalet) {
+          final previous =
+          state is LoadedBookingsState ? (state as LoadedBookingsState).bookings : <Booking>[];
+          emit(_mapFailureOrPostsToState(failureOrPosts, previousBookings: previous));
+        } else {
+          final previous = state is LoadedBookingsStateFlat
+              ? (state as LoadedBookingsStateFlat).bookings
+              : <Booking>[];
+          emit(_mapFailureOrPostsToStateFlat(failureOrPosts, previousBookings: previous));
+        }
+      }
+
+      else if (event is RefreshBookingsEvent) {
+        final failureOrPosts = await getBookingsUsecase(
+            pageNum: event.pageNumber, pageSize: event.pageSize, isChalet: true);
+        emit(_mapFailureOrPostsToState(failureOrPosts)); // no previousBookings -> fresh list
+      }
+
+      else if (event is RefreshBookingsEventFlat) {
+        final failureOrPosts = await getBookingsUsecase(
+            pageNum: event.pageNumber, pageSize: event.pageSize, isChalet: false);
+        emit(_mapFailureOrPostsToStateFlat(failureOrPosts));
+      }
+
+      else if (event is LoadBookingsById) {
         emit(LoadingBookingIdState());
-        final failureOrBookingSingle = await getBookingIdUsecase(id:int.parse(event.id));
+        final failureOrBookingSingle =
+        await getBookingIdUsecase(id: int.parse(event.id), isChalet: true);
         emit(_mapFailureOrBookingIdToState(failureOrBookingSingle));
       }
+
+      else if (event is LoadBookingsByIdFlat) {
+        emit(LoadingBookingIdStateFlat());
+        final failureOrBookingSingle =
+        await getBookingIdUsecase(id: int.parse(event.id), isChalet: false);
+        emit(_mapFailureOrBookingIdToStateFlat(failureOrBookingSingle));
+      }
+
       else if (event is BookingChaletEvent) {
         emit(LoadingBookingPaymentState());
-        final failureOrBookingSingle = await bookChaletUsecase(bookingData: event.bookingData);
+        final failureOrBookingSingle =
+        await bookChaletUsecase(bookingData: event.bookingData, isChalet: event.isChalet);
         emit(_mapFailureOrBookChaletToState(failureOrBookingSingle));
       }
+
       else if (event is BookingPaymentChaletEvent) {
         emit(LoadingBookingPaymentState());
-        final failureOrBookingSingle = await bookingPaymentUsecase(paymentData: event.paymentData);
+        final failureOrBookingSingle =
+        await bookingPaymentUsecase(paymentData: event.paymentData , isChalet: event.isChalet);
         emit(_mapFailureOrPayBookingToState(failureOrBookingSingle));
       }
     });
   }
 
-  BookingState _mapFailureOrPostsToState(Either<Failure, List<Booking>> either , int page) {
+  BookingState _mapFailureOrPostsToState(
+      Either<Failure, PaginatedBookings> either, {
+        List<Booking> previousBookings = const [],
+      }) {
     return either.fold(
-      (failure) => ErrorBookingsState(message: _mapFailureToMessage(failure)),
-      (bookings) => LoadedBookingsState(
-        bookings: bookings,
-        page: page
+          (failure) => ErrorBookingsState(message: _mapFailureToMessage(failure)),
+          (result) => LoadedBookingsState(
+        bookings: [...previousBookings, ...result.bookings],
+        page: result.currentPage,
+        hasMore: result.hasMore,
       ),
     );
   }
+
+  BookingState _mapFailureOrPostsToStateFlat(
+      Either<Failure, PaginatedBookings> either, {
+        List<Booking> previousBookings = const [],
+      }) {
+    return either.fold(
+          (failure) => ErrorBookingsStateFlat(message: _mapFailureToMessage(failure)),
+          (result) => LoadedBookingsStateFlat(
+        bookings: [...previousBookings, ...result.bookings],
+        page: result.currentPage,
+        hasMore: result.hasMore,
+      ),
+    );
+  }
+
   BookingState _mapFailureOrBookingTotalPriceToState(Either<Failure, dynamic> either) {
     return either.fold(
           (failure) => ErrorBookingTotalPriceState(message: _mapFailureToMessage(failure)),
           (totalPrice) => LoadedBookingTotalPriceState(totalBookingPrice
-        : totalPrice,
+          : totalPrice,
       ),
     );
   }
@@ -86,6 +154,15 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingState> {
 
           (failure) => ErrorBookingIdState(message: _mapFailureToMessage(failure)),
           (bookingDetails) => LoadedBookingIdState(
+        bookingDetails: bookingDetails,
+      ),
+    );
+  }
+  BookingState _mapFailureOrBookingIdToStateFlat(Either<Failure, BookingDetails> either) {
+    return either.fold(
+
+          (failure) => ErrorBookingIdStateFlat(message: _mapFailureToMessage(failure)),
+          (bookingDetails) => LoadedBookingIdStateFlat(
         bookingDetails: bookingDetails,
       ),
     );
@@ -106,9 +183,9 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingState> {
   String _mapFailureToMessage(Failure failure) {
     switch (failure.runtimeType) {
       case ServerFailure:
-        return SERVER_FAILURE_MESSAGE;
+        return getTextByKey(key: TranslationKey.keyServerError);
       case EmptyCacheFailure:
-        return EMPTY_CACHE_FAILURE_MESSAGE;
+        return getTextByKey(key: TranslationKey.keyNoData);
       case OfflineFailure:
         return getTextByKey(key: TranslationKey.keyNoInternet);
       default:

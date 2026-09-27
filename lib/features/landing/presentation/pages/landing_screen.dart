@@ -19,7 +19,7 @@ class LandingPage extends StatelessWidget {
   }
 
   Widget _buildBody() {
-    return Padding(
+    return SafeArea(child: Padding(
       padding: const EdgeInsets.all(10),
       child: BlocBuilder<LandingBloc, LandingState>(
         builder: (context, state) {
@@ -28,12 +28,15 @@ class LandingPage extends StatelessWidget {
           } else if (state is LoadedOnboardState) {
             return OnBoardPageWidget(onboards: state.onboards,);
           } else if (state is ErrorLandingState) {
-            return MessageDisplayWidget(message: state.message);
+            return MessageDisplayWidget(
+              message: state.message,
+              onRetry: () => context.read<LandingBloc>().add(LandingEventObj()),
+            );
           }
           return LoadingWidget();
         },
       ),
-    );
+    ));
   }
 
 

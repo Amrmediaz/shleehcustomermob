@@ -30,6 +30,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
         return Right(user);
       } on ServerException {
         return Left(ServerFailure());
+      } catch (e) {
+        print('❌ getUser network error: $e');
+        return Left(ServerFailure());
       }
     } else {
       return Left(OfflineFailure());
@@ -44,6 +47,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
         return const Right(unit);
       } on ServerException {
         return Left(ServerFailure());
+      } catch (e) {
+        print('❌ updateUser network error: $e');
+        return Left(ServerFailure());
       }
     } else {
       return Left(OfflineFailure());
@@ -57,6 +63,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
         await remoteDataSource.deleteUser(userId);
         return const Right(unit);
       } on ServerException {
+        return Left(ServerFailure());
+      } catch (e) {
+        print('❌ deleteAccountUser network error: $e');
         return Left(ServerFailure());
       }
     } else {

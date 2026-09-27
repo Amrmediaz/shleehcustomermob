@@ -11,29 +11,34 @@ import '../../../../core/widgets/loading_widget.dart';
 import '../widgets/chalet_booking_date/chalet_booking_date_widget.dart';
 
 class ChaletBookingPage extends StatelessWidget {
-  final ChaletDetails chalet;
+  final dynamic chalet;
+  final bool isChalet;
+
   const ChaletBookingPage({
     Key? key,
     required this.chalet,
+    required this.isChalet
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(resizeToAvoidBottomInset: true,
-      body: SafeArea(child: _buildBody(context)),
+      body: SafeArea(child: _buildBody(context,isChalet)),
     );
   }
 
 
-  Widget _buildBody(BuildContext context) {
-    return ListView(
-        padding:PADDING_PAGE ,
-        children: [
-      AppBarBack(leadingWidgetAction: () {
-        Navigator.pop(context);
-      }),
-      ChaletBookingDateWidget(chalet: chalet)
-    ]);
+  Widget _buildBody(BuildContext context , bool isChalet) {
+    return SafeArea(
+      child: ListView(
+          padding:PADDING_PAGE ,
+          children: [
+        AppBarBack(leadingWidgetAction: () {
+          Navigator.pop(context);
+        }),
+        ChaletBookingDateWidget(chalet: chalet,isChalet:isChalet ,)
+      ]),
+    );
 
   }
 }

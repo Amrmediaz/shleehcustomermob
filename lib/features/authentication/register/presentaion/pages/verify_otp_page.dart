@@ -47,13 +47,13 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
                   print("sadasdasdas");
                   CommonFunctions.showBottomDialog(
                       context,
-                      Icon(
+                    icon:  Icon(
                         Icons.sms_failed,
                         size: CommonFunctions.calculateIconSize(context),
                         color: primaryColor,
                       ),
-                      state.message,
-                      getTextByKey(key: TranslationKey.keyShouldOTPMatch));
+                   title:    state.message,
+                   description:    getTextByKey(key: TranslationKey.keyShouldOTPMatch));
                 }
               },
               builder: (context, state) {

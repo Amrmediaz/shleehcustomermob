@@ -32,6 +32,12 @@ class _FormResetWidgetState extends State<FormResetWidget> {
   }
 
   @override
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Form(
         key: _formKey,
@@ -111,12 +117,17 @@ class _FormResetWidgetState extends State<FormResetWidget> {
                   ),
 
 
-                  ActionBtn(
-                      btnColor: primaryColor,
-                      onPressed: () {
-                        validateFormThenResetPassword();
-                      },
-                      btnTitle: TranslationKey.keyResetPassword),
+                  BlocBuilder<ResetBloc, ResetPasswordState>(
+                    builder: (context, state) {
+                      return ActionBtn(
+                          isLoading: state is LoadingResetPasswordState,
+                          btnColor: primaryColor,
+                          onPressed: () {
+                            validateFormThenResetPassword();
+                          },
+                          btnTitle: TranslationKey.keyResetPassword);
+                    },
+                  ),
                 ]),
           ),
         ));

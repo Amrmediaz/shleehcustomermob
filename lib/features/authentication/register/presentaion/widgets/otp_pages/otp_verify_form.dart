@@ -30,6 +30,12 @@ class _FormVerifyOtpWidgetState extends State<FormVerifyOtpWidget> {
   }
 
   @override
+  void dispose() {
+    otpController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Form(
         key: _formKey,

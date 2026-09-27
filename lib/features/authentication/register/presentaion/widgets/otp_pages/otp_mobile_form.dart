@@ -36,6 +36,12 @@ class _FormOtpWidgetState extends State<FormOtpWidget> {
   }
 
   @override
+  void dispose() {
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Form(
         key: _formKey,
@@ -79,7 +85,7 @@ class _FormOtpWidgetState extends State<FormOtpWidget> {
                           child: CountryCodePicker(
                             onChanged: (value) {
                               _countryCodeSelected =
-                                  value.code ?? DEFAULT_COUNTRY_CODE_NUM;
+                                  value.dialCode ?? DEFAULT_COUNTRY_CODE_NUM;
                             },
                             initialSelection: 'OM',
                             favorite: const [
@@ -116,12 +122,17 @@ class _FormOtpWidgetState extends State<FormOtpWidget> {
 
 
 
-                  ActionBtn(
-                      btnColor: primaryColor,
-                      onPressed: () {
-                        validateFormThenSendOTP();
-                      },
-                      btnTitle: TranslationKey.keySendOtp),
+                  BlocBuilder<RegisterBloc, RegisterUserState>(
+                    builder: (context, state) {
+                      return ActionBtn(
+                          isLoading: state is LoadingRegisterUserState,
+                          btnColor: primaryColor,
+                          onPressed: () {
+                            validateFormThenSendOTP();
+                          },
+                          btnTitle: TranslationKey.keySendOtp);
+                    },
+                  ),
                 ]),
           ),
         ));
